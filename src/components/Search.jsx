@@ -5,21 +5,38 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [musicResults, setMusicResults] = useState([]);
   const [imageResults, setImageResults] = useState([]);
+  const [embedHtml, setEmbedHtml] = useState("");
 
-  const musicAPI = `http://localhost:3001/api/search?q=${query}`;
-  const imageAPI = `http://localhost:3001/api/images?q=${query}`;
+  const musicAPI = `http://localhost:5000/api/search?q=${query}`;
+  // const imageAPI = `http://localhost:5000/api/images?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
       const responseMusic = await axios.get(musicAPI);
-      const responseImage = await axios.get(imageAPI);
+      // const responseImage = await axios.get(imageAPI);
+      setMusicResults(responseMusic.data.data[0]);
+      if (responseMusic) {
+        //const trackUrl = `https://www.deezer.com/track/${responseMusic.id}`;
+        const trackUrl = "https://www.deezer.com/track/102142414";
 
-      console.log(responseMusic.data);
-      console.log(responseImage.data);
-      setMusicResults(responseMusic.data.data);
-      setImageResults(responseImage.data.results);
+        const oembedResponse = await axios.get(
+          `http://localhost:5000/api/oembed`,
+          {
+            params: {
+              url: trackUrl,
+              format: "json",
+            },
+          }
+        );
+        console.log(oembedResponse);
+        setEmbedHtml(oembedResponse.data);
+      }
+
+      // console.log(responseMusic.data);
+      // console.log(responseImage.data);
+      // setImageResults(responseImage.data.results);
     } catch (e) {
       console.error("Error fetching data from APIs", e);
     }
@@ -41,17 +58,13 @@ export default function Search() {
       </form>
       <section>
         <h2>Music Results</h2>
-        <ul>
-          {musicResults.map((result) => (
-            <li key={result.id}>{result.title}</li>
-          ))}
-        </ul>
+        {embedHtml && <div dangerouslySetInnerHTML={{ __html: embedHtml }} />}
         <h2>Image Results</h2>
-        <ul>
+        {/* <ul>
           {imageResults.map((result) => (
             <li key={result.id}>{result.title}</li>
           ))}
-        </ul>
+        </ul> */}
       </section>
     </section>
   );
