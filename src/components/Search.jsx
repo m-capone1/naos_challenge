@@ -6,8 +6,8 @@ export default function Search() {
   const [musicResults, setMusicResults] = useState([]);
   const [imageResults, setImageResults] = useState([]);
 
-  const musicAPI = `https://api.deezer.com/search?q=${query}`;
-  const imageAPI = ``;
+  const musicAPI = `http://localhost:3001/api/search?q=${query}`;
+  const imageAPI = `http://localhost:3001/api/images?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -15,17 +15,21 @@ export default function Search() {
     try {
       const responseMusic = await axios.get(musicAPI);
       const responseImage = await axios.get(imageAPI);
+
       console.log(responseMusic.data);
       console.log(responseImage.data);
-      setMusicResults(responseMusic.data);
-      setImageResults(responseImage.data);
+      setMusicResults(responseMusic.data.data);
+      setImageResults(responseImage.data.results);
     } catch (e) {
-      console.e("Error fetching data from APIs", e);
+      console.error("Error fetching data from APIs", e);
     }
   };
 
   return (
-    <section className="flex justify-center items-center">
+    <section className="flex flex-col text-lg py-24 justify-center items-center">
+      <div className="flex flex-col">
+        <h1>Welcome! Please search any topic below.</h1>
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -35,7 +39,7 @@ export default function Search() {
         />
         <button type="submit">Search</button>
       </form>
-      {/* <section>
+      <section>
         <h2>Music Results</h2>
         <ul>
           {musicResults.map((result) => (
@@ -48,7 +52,7 @@ export default function Search() {
             <li key={result.id}>{result.title}</li>
           ))}
         </ul>
-      </section> */}
+      </section>
     </section>
   );
 }
