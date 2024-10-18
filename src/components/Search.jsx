@@ -8,7 +8,7 @@ export default function Search() {
   const [embedHtml, setEmbedHtml] = useState("");
 
   const musicAPI = `http://localhost:5000/api/search?q=${query}`;
-  // const imageAPI = `http://localhost:5000/api/images?q=${query}`;
+  const imageAPI = `http://localhost:5000/api/images?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -16,10 +16,13 @@ export default function Search() {
     try {
       const responseMusic = await axios.get(musicAPI);
       // const responseImage = await axios.get(imageAPI);
+
+      const musicId = responseMusic.data.data[0].id;
+      console.log(responseMusic.data.data[0].id);
+
       setMusicResults(responseMusic.data.data[0]);
-      if (responseMusic) {
-        //const trackUrl = `https://www.deezer.com/track/${responseMusic.id}`;
-        const trackUrl = "https://www.deezer.com/track/102142414";
+      if (musicId) {
+        const trackUrl = `https://www.deezer.com/track/${musicId}`;
 
         const oembedResponse = await axios.get(
           `http://localhost:5000/api/oembed`,
@@ -30,12 +33,9 @@ export default function Search() {
             },
           }
         );
-        console.log(oembedResponse);
         setEmbedHtml(oembedResponse.data);
       }
 
-      // console.log(responseMusic.data);
-      // console.log(responseImage.data);
       // setImageResults(responseImage.data.results);
     } catch (e) {
       console.error("Error fetching data from APIs", e);
