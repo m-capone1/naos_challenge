@@ -84,7 +84,11 @@ export default function Search() {
       <section className="flex flex-col justify-center items-center pt-8 w-full">
         <h2 className="py-4">Search results for: {query}</h2>
         <h3 className="font-bold m-4 text-xl">Music Results</h3>
-        {embedHtml && <div dangerouslySetInnerHTML={{ __html: embedHtml }} />}
+        {embedHtml ? (
+          <div dangerouslySetInnerHTML={{ __html: embedHtml }} />
+        ) : (
+          <p className="text-red-600">No music available.</p>
+        )}
         <h3 className="font-bold m-4 text-xl">Image Results</h3>
         <Images imageResults={imageResults} />
       </section>

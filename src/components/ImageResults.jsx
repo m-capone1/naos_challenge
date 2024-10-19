@@ -3,6 +3,12 @@ import { useState, useEffect } from "react";
 const ImageSlider = ({ imageResults }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useEffect(() => {
+    if (imageResults.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [imageResults]);
+
   const nextImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % imageResults.length);
   };
@@ -19,16 +25,18 @@ const ImageSlider = ({ imageResults }) => {
     }, 3000);
 
     return () => clearInterval(intervalId);
-  }, [imageResults.length]);
+  }, [imageResults]);
+
+  const currentImage = imageResults[currentIndex];
 
   return (
     <section className="flex flex-col justify-center items-center">
-      {imageResults.length > 0 && (
+      {imageResults.length > 0 && currentImage && (
         <div className="relative flex flex-col justify-center items-center">
           <img
             className="w-1/2 md:w-3/5 h-auto rounded-lg"
-            src={imageResults[currentIndex].urls.regular}
-            alt={imageResults[currentIndex].alt_description || "Image"}
+            src={currentImage.urls.regular}
+            alt={currentImage.alt_description || "Image"}
           />
           <p className="mt-2 text-lg">
             {currentIndex + 1} / {imageResults.length}
@@ -49,7 +57,9 @@ const ImageSlider = ({ imageResults }) => {
           </div>
         </div>
       )}
-      {imageResults.length === 0 && <p>No images available.</p>}
+      {imageResults.length === 0 && (
+        <p className="text-red-600">No images available.</p>
+      )}
     </section>
   );
 };
