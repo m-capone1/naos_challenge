@@ -6,12 +6,20 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [imageResults, setImageResults] = useState([]);
   const [embedHtml, setEmbedHtml] = useState("");
+  const [error, setError] = useState(false);
 
   const musicAPI = `http://localhost:5000/api/search?q=${query}`;
   const imageAPI = `http://localhost:5000/api/unsplash?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!query.trim()) {
+      setError(true);
+      return;
+    }
+
+    setError(false);
 
     try {
       const responseMusic = await axios.get(musicAPI);
@@ -37,32 +45,47 @@ export default function Search() {
       console.error("Error fetching data from APIs", e);
     }
 
-    event.target.value = "";
+    setQuery("");
   };
-
-  if (!imageResults) {
-    return <p>Loading...</p>;
-  }
 
   return (
     <section className="flex flex-col text-lg py-24 justify-center items-center">
       <div className="flex flex-col">
-        <h1>Welcome! Please search any topic below.</h1>
+        <h1 className="text-2xl lg:text-4xl pb-8">
+          Welcome! Please search any topic below.
+        </h1>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        className="w-full flex flex-col justify-center items-center"
+      >
         <input
           type="text"
           placeholder="Search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          className={`w-1/2 p-3 border rounded-md focus:outline-none ${
+            error
+              ? "border-red-600 ring-red-300"
+              : "border-gray-300 focus:ring-2 focus:ring-emerald-600"
+          }`}
         />
-        <button type="submit">Search</button>
+        {error && (
+          <p className="text-red-600 mt-2">Please enter a search query.</p>
+        )}
+        {""}
+        <button
+          type="submit"
+          className="mt-2 bg-emerald-600 text-white py-2 px-4 rounded-md"
+        >
+          Search
+        </button>
       </form>
-      <section className="flex flex-col justify-center items-center">
-        <h2>Search results for: {query}</h2>
-        <h3>Music Results</h3>
+      <section className="flex flex-col justify-center items-center pt-8 w-full">
+        <h2 className="py-4">Search results for: {query}</h2>
+        <h3 className="font-bold m-4 text-xl">Music Results</h3>
         {embedHtml && <div dangerouslySetInnerHTML={{ __html: embedHtml }} />}
-        <h3>Image Results</h3>
+        <h3 className="font-bold m-4 text-xl">Image Results</h3>
         <Images imageResults={imageResults} />
       </section>
     </section>

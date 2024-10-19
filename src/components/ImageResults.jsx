@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ImageSlider = ({ imageResults }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,27 +13,40 @@ const ImageSlider = ({ imageResults }) => {
     );
   };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      nextImage();
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [imageResults.length]);
+
   return (
     <section className="flex flex-col justify-center items-center">
       {imageResults.length > 0 && (
-        <div className="relative flex justify-center items-center">
+        <div className="relative flex flex-col justify-center items-center">
           <img
-            className="w-1/2 h-auto"
+            className="w-1/2 md:w-3/5 h-auto rounded-lg"
             src={imageResults[currentIndex].urls.regular}
             alt={imageResults[currentIndex].alt_description || "Image"}
           />
-          <button
-            onClick={prevImage}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-500 text-white p-2"
-          >
-            Previous
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-500 text-white p-2"
-          >
-            Next
-          </button>
+          <p className="mt-2 text-lg">
+            {currentIndex + 1} / {imageResults.length}
+          </p>
+          <div className="flex justify-between w-full mt-4">
+            <button
+              onClick={prevImage}
+              className="rounded-3xl w-32 bg-emerald-600 text-white py-2 px-4 mx-2"
+            >
+              Previous
+            </button>
+            <button
+              onClick={nextImage}
+              className="rounded-3xl w-32 bg-emerald-600 text-white py-2 px-4 mx-2"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
       {imageResults.length === 0 && <p>No images available.</p>}
