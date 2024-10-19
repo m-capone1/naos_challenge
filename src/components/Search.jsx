@@ -8,8 +8,9 @@ export default function Search() {
   const [embedHtml, setEmbedHtml] = useState("");
   const [error, setError] = useState(false);
 
-  const musicAPI = `http://localhost:5000/api/search?q=${query}`;
-  const imageAPI = `http://localhost:5000/api/unsplash?q=${query}`;
+  const baseUrl = "https://naoschallenge-production.up.railway.app";
+  const musicAPI = `${baseUrl}/api/search?q=${query}`;
+  const imageAPI = `${baseUrl}/api/unsplash?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -30,15 +31,12 @@ export default function Search() {
       if (musicId) {
         const trackUrl = `https://www.deezer.com/track/${musicId}`;
 
-        const oembedResponse = await axios.get(
-          `http://localhost:5000/api/oembed`,
-          {
-            params: {
-              url: trackUrl,
-              format: "json",
-            },
-          }
-        );
+        const oembedResponse = await axios.get(`${baseUrl}/api/oembed`, {
+          params: {
+            url: trackUrl,
+            format: "json",
+          },
+        });
         setEmbedHtml(oembedResponse.data);
       }
     } catch (e) {
