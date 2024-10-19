@@ -6,7 +6,9 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [imageResults, setImageResults] = useState([]);
   const [embedHtml, setEmbedHtml] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [lastSearch, setLastSearch] = useState("");
 
   const baseUrl = "https://naoschallenge-production.up.railway.app";
   const musicAPI = `${baseUrl}/api/search?q=${query}`;
@@ -16,21 +18,28 @@ export default function Search() {
     event.preventDefault();
 
     if (!query.trim()) {
-      setError(true);
+      setError("Please enter a valid search query.");
       return;
     }
 
-    setError(false);
+    setError("");
+    setLoading(true);
+    setLastSearch(query);
+    setQuery("");
+    setImageResults([]);
+    setEmbedHtml("");
 
     try {
-      const responseMusic = await axios.get(musicAPI);
-      const responseImage = await axios.get(imageAPI);
-      const musicId = responseMusic.data.data[0].id;
+      const [responseMusic, responseImage] = await Promise.all([
+        axios.get(musicAPI),
+        axios.get(imageAPI),
+      ]);
 
+      const musicId = responseMusic.data.data[0]?.id;
       setImageResults(responseImage.data.results);
+
       if (musicId) {
         const trackUrl = `https://www.deezer.com/track/${musicId}`;
-
         const oembedResponse = await axios.get(`${baseUrl}/api/oembed`, {
           params: {
             url: trackUrl,
@@ -41,9 +50,10 @@ export default function Search() {
       }
     } catch (e) {
       console.error("Error fetching data from APIs", e);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setQuery("");
   };
 
   return (
@@ -68,24 +78,24 @@ export default function Search() {
               : "border-gray-300 focus:ring-2 focus:ring-emerald-600"
           }`}
         />
-        {error && (
-          <p className="text-red-600 mt-2">Please enter a search query.</p>
-        )}
-        {""}
+        {error && <p className="text-red-600 mt-2">{error}</p>}
         <button
           type="submit"
           className="mt-2 bg-emerald-600 text-white py-2 px-4 rounded-md"
+          disabled={loading}
         >
-          Search
+          {loading ? "Loading..." : "Search"}
         </button>
       </form>
       <section className="flex flex-col justify-center items-center pt-8 w-full">
-        <h2 className="py-4">Search results for: {query}</h2>
+        {lastSearch && (
+          <h2 className="py-4">Search results for: {lastSearch}</h2>
+        )}
         <h3 className="font-bold m-4 text-xl">Music Results</h3>
         {embedHtml ? (
           <div dangerouslySetInnerHTML={{ __html: embedHtml }} />
         ) : (
-          <p className="text-red-600">No music available.</p>
+          !loading && <p className="text-red-600">No music available.</p>
         )}
         <h3 className="font-bold m-4 text-xl">Image Results</h3>
         <Images imageResults={imageResults} />
