@@ -1,26 +1,24 @@
 import { useState } from "react";
 import axios from "axios";
+import Images from "./ImageResults";
 
 export default function Search() {
   const [query, setQuery] = useState("");
-  const [musicResults, setMusicResults] = useState([]);
   const [imageResults, setImageResults] = useState([]);
   const [embedHtml, setEmbedHtml] = useState("");
 
   const musicAPI = `http://localhost:5000/api/search?q=${query}`;
-  const imageAPI = `http://localhost:5000/api/images?q=${query}`;
+  const imageAPI = `http://localhost:5000/api/unsplash?q=${query}`;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
       const responseMusic = await axios.get(musicAPI);
-      // const responseImage = await axios.get(imageAPI);
-
+      const responseImage = await axios.get(imageAPI);
       const musicId = responseMusic.data.data[0].id;
-      console.log(responseMusic.data.data[0].id);
 
-      setMusicResults(responseMusic.data.data[0]);
+      setImageResults(responseImage.data.results);
       if (musicId) {
         const trackUrl = `https://www.deezer.com/track/${musicId}`;
 
@@ -35,12 +33,16 @@ export default function Search() {
         );
         setEmbedHtml(oembedResponse.data);
       }
-
-      // setImageResults(responseImage.data.results);
     } catch (e) {
       console.error("Error fetching data from APIs", e);
     }
+
+    event.target.value = "";
   };
+
+  if (!imageResults) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <section className="flex flex-col text-lg py-24 justify-center items-center">
@@ -56,15 +58,12 @@ export default function Search() {
         />
         <button type="submit">Search</button>
       </form>
-      <section>
-        <h2>Music Results</h2>
+      <section className="flex flex-col justify-center items-center">
+        <h2>Search results for: {query}</h2>
+        <h3>Music Results</h3>
         {embedHtml && <div dangerouslySetInnerHTML={{ __html: embedHtml }} />}
-        <h2>Image Results</h2>
-        {/* <ul>
-          {imageResults.map((result) => (
-            <li key={result.id}>{result.title}</li>
-          ))}
-        </ul> */}
+        <h3>Image Results</h3>
+        <Images imageResults={imageResults} />
       </section>
     </section>
   );
