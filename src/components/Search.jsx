@@ -14,14 +14,17 @@ export default function Search() {
   const musicAPI = `${baseUrl}/api/search?q=${query}`;
   const imageAPI = `${baseUrl}/api/unsplash?q=${query}`;
 
+  //handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    //set error state if query is empty
     if (!query.trim()) {
       setError("Please enter a valid search query.");
       return;
     }
 
+    //reset states after successful form submission
     setError("");
     setLoading(true);
     setLastSearch(query);
@@ -29,6 +32,7 @@ export default function Search() {
     setImageResults([]);
     setEmbedHtml("");
 
+    //fetch data from APIs with axios
     try {
       const [responseMusic, responseImage] = await Promise.all([
         axios.get(musicAPI),
@@ -38,6 +42,7 @@ export default function Search() {
       const musicId = responseMusic.data.data[0]?.id;
       setImageResults(responseImage.data.results);
 
+      //fetch music data if musicId is available
       if (musicId) {
         const trackUrl = `https://www.deezer.com/track/${musicId}`;
         const oembedResponse = await axios.get(`${baseUrl}/api/oembed`, {

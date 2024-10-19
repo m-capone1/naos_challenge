@@ -3,22 +3,26 @@ import { useState, useEffect } from "react";
 const ImageSlider = ({ imageResults }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  //set the current index to 0 when imageResults change
   useEffect(() => {
     if (imageResults.length > 0) {
       setCurrentIndex(0);
     }
   }, [imageResults]);
 
+  //calculate the next image index
   const nextImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % imageResults.length);
   };
 
+  //calculate the previous image index
   const prevImage = () => {
     setCurrentIndex(
       (prevIndex) => (prevIndex - 1 + imageResults.length) % imageResults.length
     );
   };
 
+  //auto slide to the next image every 3 seconds
   useEffect(() => {
     const intervalId = setInterval(() => {
       nextImage();
